@@ -1,0 +1,57 @@
+{
+  "type": "record",
+  "name": "PropertyData",
+  "fields": [
+    {
+      "name": "period_begin",
+      "type": {
+        "type": "int",
+        "logicalType": "date"
+      }
+    },
+    {
+      "name": "period_end",
+      "type": {
+        "type": "int",
+        "logicalType": "date"
+      }
+    },
+    {"name": "region_type", "type": "string"},
+    {"name": "region_type_id", "type": "int"},
+    {"name": "region_name", "type": "string"},
+    {"name": "region_id", "type": "int"},
+    {"name": "duration", "type": "string"},
+    {"name": "adjusted_average_new_listings", "type": "float"},
+    {"name": "adjusted_average_new_listings_yoy", "type": "float"},
+    {"name": "average_pending_sales_listing_updates", "type": "float"},
+    {"name": "average_pending_sales_listing_updates_yoy", "type": "float"},
+    {"name": "off_market_in_two_weeks", "type": "float"},
+    {"name": "off_market_in_two_weeks_yoy", "type": "float"},
+    {"name": "adjusted_average_homes_sold", "type": "float"},
+    {"name": "adjusted_average_homes_sold_yoy", "type": "float"},
+    {"name": "median_new_listing_price", "type": "float"},
+    {"name": "median_new_listing_price_yoy", "type": "float"},
+    {"name": "median_sale_price", "type": "float"},
+    {"name": "median_sale_price_yoy", "type": "float"},
+    {"name": "median_days_to_close", "type": "float"},
+    {"name": "median_days_to_close_yoy", "type": "float"},
+    {"name": "median_new_listing_ppsf", "type": "float"},
+    {"name": "median_new_listing_ppsf_yoy", "type": "float"},
+    {"name": "active_listings", "type": "float"},
+    {"name": "active_listings_yoy", "type": "float"},
+    {"name": "median_days_on_market", "type": "float"},
+    {"name": "median_days_on_market_yoy", "type": "float"},
+    {"name": "percent_active_listings_with_price_drops", "type": "float"},
+    {"name": "percent_active_listings_with_price_drops_yoy", "type": "float"},
+    {"name": "age_of_inventory", "type": "float"},
+    {"name": "age_of_inventory_yoy", "type": "float"},
+    {"name": "months_of_supply", "type": "float"},
+    {"name": "months_of_supply_yoy", "type": "float"},
+    {"name": "median_pending_sqft", "type": "float"},
+    {"name": "median_pending_sqft_yoy", "type": "float"},
+    {"name": "average_sale_to_list_ratio", "type": "float"},
+    {"name": "average_sale_to_list_ratio_yoy", "type": "float"},
+    {"name": "median_sale_ppsf", "type": "float"},
+    {"name": "median_sale_ppsf_yoy", "type": "float"}
+  ]
+}
