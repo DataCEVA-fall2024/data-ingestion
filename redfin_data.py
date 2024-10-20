@@ -60,8 +60,8 @@ def process_large_csv(filename):
     print(f"Total rows processed: {total_rows_processed}")
 
 if __name__ == "__main__":
-    csv_url = 'https://redfin-public-data.s3.us-west-2.amazonaws.com/redfin_covid19/weekly_housing_market_data_most_recent.tsv000'
+#    csv_url = 'https://redfin-public-data.s3.us-west-2.amazonaws.com/redfin_covid19/weekly_housing_market_data_most_recent.tsv000'
     local_filename = 'redfin_weekly_data.csv'
 
-    download_large_file(csv_url, local_filename)
+#    download_large_file(csv_url, local_filename)
     process_large_csv(local_filename)

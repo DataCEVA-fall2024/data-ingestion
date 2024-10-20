@@ -1,4 +1,5 @@
 # Ignore
 venv/
 .env
-.csv
+
+*.csv
