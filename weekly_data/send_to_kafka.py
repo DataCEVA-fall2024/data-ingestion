@@ -1,3 +1,4 @@
+'''
 import fastavro
 import os
 
@@ -82,3 +83,54 @@ if __name__ == "__main__":
     schema_registry_url = 'http://localhost:8081'  # Schema registry 
 
     send_avro_to_kafka(avro_file_path, schema_registry_url, kafka_topic, kafka_broker, schema_file_path)
+'''
+import fastavro
+import os
+from uuid import uuid4
+from confluent_kafka import KafkaError
+
+# Assuming this comes from the earlier pipeline code
+from producer import publish_event
+
+def delivery_report(err, msg):
+    """Reports the success or failure of message delivery to Kafka."""
+    if err is not None:
+        print(f"Delivery failed for record {msg.key()}: {err}")
+        return
+    print(f"Record {msg.key()} successfully produced to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
+
+def send_avro_to_kafka(avro_file, kafka_topic, schema_file):
+    """
+    Send Avro data from an Avro file to Kafka using the publish_event function from the pipeline.
+    
+    :param avro_file: Path to the Avro file.
+    :param kafka_topic: Kafka topic to send messages to.
+    :param schema_file: Path to the Avro schema file.
+    """
+    # Load Avro schema
+    path = os.path.realpath(os.path.dirname(__file__))
+    with open(f"{path}/avro/{schema_file}") as f:
+        schema_str = f.read()
+
+    print(f"Producing records to Kafka topic: {kafka_topic}")
+
+    # Open and read the Avro file
+    with open(avro_file, 'rb') as f:
+        reader = fastavro.reader(f)
+        for record in reader:
+            try:
+                # Use the publish_event function from the pipeline to send the event to Kafka
+                publish_event(event=record, topic=kafka_topic)
+                print(f"Record sent to topic {kafka_topic}: {record}")
+            except KafkaError as e:
+                print(f"Failed to send record to Kafka: {e}")
+
+if __name__ == "__main__":
+    # Define input files and Kafka settings
+    avro_file_path = 'redfin_weekly_data.avro'
+    schema_file_path = 'weekly_data_schema.avsc'
+    kafka_topic = 'your_topic_name'  # Kafka topic to which records will be sent
+
+    # Call the function to send Avro records to Kafka using the publish_event function
+    send_avro_to_kafka(avro_file_path, kafka_topic, schema_file_path)
+
