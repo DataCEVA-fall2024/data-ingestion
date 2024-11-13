@@ -1,0 +1,8 @@
+[2024-10-21 12:53:40,041] INFO [SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000000062504-0000000002 because we have waited at least 60 minute(s). (org.apache.kafka.image.publisher.SnapshotGenerator)
+[2024-10-21 12:53:40,078] INFO [SnapshotEmitter id=1] Successfully wrote snapshot 00000000000000062504-0000000002 (org.apache.kafka.image.publisher.SnapshotEmitter)
+[2024-10-21 12:54:21,886] INFO Sent auto-creation request for Set(your_topic_name3) to the active controller. (kafka.server.DefaultAutoTopicCreationManager)
+[2024-10-21 12:54:21,969] INFO [ReplicaFetcherManager on broker 1] Removed fetcher for partitions Set(your_topic_name3-0) (kafka.server.ReplicaFetcherManager)
+[2024-10-21 12:54:21,984] INFO [LogLoader partition=your_topic_name3-0, dir=/tmp/kraft-combined-logs] Loading producer state till offset 0 with message format version 2 (kafka.log.UnifiedLog$)
+[2024-10-21 12:54:21,991] INFO Created log for partition your_topic_name3-0 in /tmp/kraft-combined-logs/your_topic_name3-0 with properties {} (kafka.log.LogManager)
+[2024-10-21 12:54:21,992] INFO [Partition your_topic_name3-0 broker=1] No checkpointed highwatermark is found for partition your_topic_name3-0 (kafka.cluster.Partition)
+[2024-10-21 12:54:21,992] INFO [Partition your_topic_name3-0 broker=1] Log loaded for partition your_topic_name3-0 with initial high watermark 0 (kafka.cluster.Partition)

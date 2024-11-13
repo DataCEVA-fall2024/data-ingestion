@@ -1,48 +1,74 @@
-import fastavro
+
 from kafka import KafkaConsumer
-from io import BytesIO
+import json
+import threading
 
-def load_avro_schema(schema_file):
-    """Load Avro schema from a file."""
-    schema = fastavro.schema.load_schema(schema_file)
-    return schema
+def start_kafka_consumer(topic, process_callback, bootstrap_servers='localhost:9092'):
+    """
+    Start a Kafka consumer that listens to a specified topic, batches messages for up to 20 seconds,
+    and processes the batch with a callback function.
 
-def deserialize_avro(data, schema):
-    """Deserialize Avro-encoded bytes using the provided schema."""
-    bytes_io = BytesIO(data)
-    reader = fastavro.reader(bytes_io, schema)
-    records = [record for record in reader]
-    return records
-
-def consume_avro_from_kafka(kafka_topic, kafka_broker, schema_file,callback):
-    """Consume Avro data from Kafka and deserialize it."""
-    # Load Avro schema
-    avro_schema = load_avro_schema(schema_file)
-
-    # Initialize Kafka consumer
+    :param topic: The Kafka topic to listen to.
+    :param process_callback: The callback function to process each message batch.
+    :param bootstrap_servers: Kafka server address (default is 'localhost:9092').
+    """
     consumer = KafkaConsumer(
-        kafka_topic,
-        bootstrap_servers=kafka_broker,
-        auto_offset_reset='earliest',
-        value_deserializer=lambda x: x  # Leave data as bytes
+        topic,
+        bootstrap_servers=bootstrap_servers,
+        value_deserializer=lambda x: json.loads(x.decode('utf-8')),
+        auto_offset_reset="earliest",
+        enable_auto_commit=True
     )
 
-    print(f"Listening for messages on topic: {kafka_topic}")
+    print(f"Listening to Kafka topic '{topic}'...")
 
-    # Consume messages
+    # Variables to manage batching
+    batch = []  # Buffer to accumulate events
+    batch_lock = threading.RLock()  # Use RLock instead of Lock
+    batch_timer = None  # Timer for managing 20-second batching window
+
+    def flush_batch():
+        """Flush the current batch by sending it to the callback and clearing the buffer."""
+        nonlocal batch, batch_timer
+        with batch_lock:
+            if batch:
+                # Copy the batch to avoid modification during processing
+                current_batch = batch.copy()
+                batch.clear()  # Clear the batch after copying
+                batch_timer = None  # Reset the timer
+            else:
+                return  # No events to flush
+
+        # Process the batch outside the lock to avoid blocking other operations
+        print(f"Flushing batch of {len(current_batch)} events to callback.")
+        process_callback(current_batch)
+
+    def start_batch_timer():
+        """Start the 20-second timer to trigger batch flush."""
+        nonlocal batch_timer
+        with batch_lock:
+            if batch_timer is None:
+                batch_timer = threading.Timer(20, flush_batch)
+                batch_timer.start()
+                print("Started a new 20-second batch timer.")
+
     for message in consumer:
-        avro_data = message.value  # This will be the Avro-encoded byte data
-        try:
-            # Deserialize Avro bytes
-            records = deserialize_avro(avro_data, avro_schema)
-            callback(records)
-        except Exception as e:
-            print(f"Failed to deserialize Avro data: {e}")
+        event = message.value  # Extract the event data
+        print(f"Received event: {event}")
 
-if __name__ == "__main__":
-    kafka_topic = 'your_topic_name'  # Kafka topic to consume from
-    kafka_broker = 'localhost:9092'  # Kafka broker
-    schema_file_path = '/mnt/c/Users/Aryan/Projects/sem7/CS639/data-ingestion/weekly_data/weekly_data_schema.avsc'  # Avro schema path
+        # Add the event to the batch
+        with batch_lock:
+            batch.append(event)
+            print(f"Event added to batch. Current batch size: {len(batch)}")
 
-    consume_avro_from_kafka(kafka_topic, kafka_broker, schema_file_path)
+            # Start the timer if this is the first event in the batch
+            if len(batch) == 1:
+                start_batch_timer()
+
+    # Ensure any remaining messages are flushed when the consumer stops
+    flush_batch()
+
+
+
+
 

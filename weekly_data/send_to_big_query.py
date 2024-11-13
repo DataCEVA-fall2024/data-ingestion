@@ -1,107 +1,103 @@
+import fastavro
+from consumer import start_kafka_consumer
+from io import BytesIO
 from google.cloud import bigquery
 from google.cloud.bigquery import LoadJobConfig, SourceFormat
-from io import BytesIO
-import fastavro
-from consumer import consume_avro_from_kafka
-
+import json
+from datetime import datetime
+import os
+import threading
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] ='/mnt/c/Users/Aryan/Downloads/uw-capstone-b295368271ff.JSON'
 # Initialize BigQuery client
 client = bigquery.Client()
+topic_name = 'Aryan_dhanuka123'
+schema_file_path = './weekly_data_schema.avsc' 
+dataset_id = 'raw_zone'
+table_id = 'redfin_raw_data'
 
-def send_to_bigquery_in_avro(records, schema, dataset_id, table_id):
-    """
-    Sends deserialized Avro records to BigQuery in Avro format.
+def load_avro_schema(schema_file):
+    """Load Avro schema from a file."""
+    return fastavro.schema.load_schema(schema_file)
 
-    :param records: Deserialized Avro records.
-    :param schema: Avro schema used for serialization.
-    :param dataset_id: BigQuery dataset ID.
-    :param table_id: BigQuery table ID.
-    """
+def validate_and_convert_types(json_record, avro_schema):
+    """Validate and convert the JSON record's fields based on the Avro schema."""
+    converted_record = {}
+
+    for field in avro_schema['fields']:
+        field_name = field['name']
+        field_type = field['type']
+
+        if field_name in json_record:
+            value = json_record[field_name]
+            if value in [None, '', 'null']:  # Adjust based on your input format
+                converted_record[field_name] = field.get('default', None)
+            else:
+                if isinstance(field_type, dict) and 'logicalType' in field_type:
+                    if field_type['logicalType'] == 'date':
+                        try:
+                            converted_record[field_name] = datetime.strptime(value, '%Y-%m-%d').date()
+                        except ValueError:
+                            converted_record[field_name] = None
+                elif field_type == 'int':
+                    try:
+                        converted_record[field_name] = int(value)
+                    except ValueError:
+                        converted_record[field_name] = None
+                elif field_type == 'float':
+                    try:
+                        converted_record[field_name] = float(value)
+                    except ValueError:
+                        converted_record[field_name] = None
+                elif field_type == 'string':
+                    converted_record[field_name] = str(value)
+                else:
+                    converted_record[field_name] = value
+        else:
+            converted_record[field_name] = field.get('default', None)
+
+    return converted_record
+
+def convert_batch_to_avro(batch, avro_schema):
+    """Convert a batch of JSON records to Avro format with data type validation and conversion."""
+    avro_bytes_io = BytesIO()
+
+    # Validate and convert each record in the batch
+    validated_records = [validate_and_convert_types(record, avro_schema) for record in batch]
+
+    # Write all validated records to Avro in one operation
     try:
-        # Create a BytesIO buffer to store the Avro data
-        avro_bytes_io = BytesIO()
-
-        # Write records to Avro format using fastavro
-        fastavro.writer(avro_bytes_io, schema, records)
-
-        # Reset buffer position to the start
-        avro_bytes_io.seek(0)
-
-        # BigQuery table reference
-        table_ref = client.dataset(dataset_id).table(table_id)
-
-        # Configure the load job to accept Avro format
-        job_config = LoadJobConfig()
-        job_config.source_format = SourceFormat.AVRO
-        job_config.schema = [bigquery.SchemaField("period_begin", "DATE"),
-                             bigquery.SchemaField("period_end", "DATE"),
-                             bigquery.SchemaField("region_type", "STRING"),
-                             bigquery.SchemaField("region_type_id", "INTEGER"),
-                             bigquery.SchemaField("region_name", "STRING"),
-                             bigquery.SchemaField("region_id", "INTEGER"),
-                             bigquery.SchemaField("duration", "STRING"),
-                             bigquery.SchemaField("adjusted_average_new_listings", "FLOAT"),
-                             bigquery.SchemaField("adjusted_average_new_listings_yoy", "FLOAT"),
-                             bigquery.SchemaField("average_pending_sales_listing_updates", "FLOAT"),
-                             bigquery.SchemaField("average_pending_sales_listing_updates_yoy", "FLOAT"),
-                             bigquery.SchemaField("off_market_in_two_weeks", "FLOAT"),
-                             bigquery.SchemaField("off_market_in_two_weeks_yoy", "FLOAT"),
-                             bigquery.SchemaField("adjusted_average_homes_sold", "FLOAT"),
-                             bigquery.SchemaField("adjusted_average_homes_sold_yoy", "FLOAT"),
-                             bigquery.SchemaField("median_new_listing_price", "FLOAT"),
-                             bigquery.SchemaField("median_new_listing_price_yoy", "FLOAT"),
-                             bigquery.SchemaField("median_sale_price", "FLOAT"),
-                             bigquery.SchemaField("median_sale_price_yoy", "FLOAT"),
-                             bigquery.SchemaField("median_days_to_close", "FLOAT"),
-                             bigquery.SchemaField("median_days_to_close_yoy", "FLOAT"),
-                             bigquery.SchemaField("median_new_listing_ppsf", "FLOAT"),
-                             bigquery.SchemaField("median_new_listing_ppsf_yoy", "FLOAT"),
-                             bigquery.SchemaField("active_listings", "FLOAT"),
-                             bigquery.SchemaField("active_listings_yoy", "FLOAT"),
-                             bigquery.SchemaField("median_days_on_market", "FLOAT"),
-                             bigquery.SchemaField("median_days_on_market_yoy", "FLOAT"),
-                             bigquery.SchemaField("percent_active_listings_with_price_drops", "FLOAT"),
-                             bigquery.SchemaField("percent_active_listings_with_price_drops_yoy", "FLOAT"),
-                             bigquery.SchemaField("age_of_inventory", "FLOAT"),
-                             bigquery.SchemaField("age_of_inventory_yoy", "FLOAT"),
-                             bigquery.SchemaField("months_of_supply", "FLOAT"),
-                             bigquery.SchemaField("months_of_supply_yoy", "FLOAT"),
-                             bigquery.SchemaField("median_pending_sqft", "FLOAT"),
-                             bigquery.SchemaField("median_pending_sqft_yoy", "FLOAT"),
-                             bigquery.SchemaField("average_sale_to_list_ratio", "FLOAT"),
-                             bigquery.SchemaField("average_sale_to_list_ratio_yoy", "FLOAT"),
-                             bigquery.SchemaField("median_sale_ppsf", "FLOAT"),
-                             bigquery.SchemaField("median_sale_ppsf_yoy", "FLOAT")]
-
-        # Load the Avro data into BigQuery
-        load_job = client.load_table_from_file(avro_bytes_io, table_ref, job_config=job_config)
-
-        # Wait for the job to complete
-        load_job.result()
-
-        print(f"Loaded {load_job.output_rows} rows into {dataset_id}.{table_id}")
-
+        fastavro.writer(avro_bytes_io, avro_schema, validated_records)
     except Exception as e:
-        print(f"Error while sending to BigQuery: {e}")
-    
-def process_records_for_bigquery(records, schema, dataset_id, table_id):
-    """
-    Callback function to process Avro records and send them to BigQuery.
+        print(f"Error during Avro batch conversion: {e}")
+        return None
 
-    :param records: Deserialized Avro records.
-    :param schema: Avro schema for the records.
-    :param dataset_id: BigQuery dataset ID.
-    :param table_id: BigQuery table ID.
-    """
-    print(f"Processing {len(records)} records for BigQuery.")
-    send_to_bigquery_in_avro(records, schema, dataset_id, table_id)
+    avro_bytes_io.seek(0)
+    return avro_bytes_io.getvalue()
 
+def send_to_bigquery_in_avro(avro_data, dataset_id, table_id):
+    """Send Avro data to BigQuery."""
+    table_ref = client.dataset(dataset_id).table(table_id)
+
+    job_config = LoadJobConfig()
+    job_config.source_format = SourceFormat.AVRO
+
+    load_job = client.load_table_from_file(BytesIO(avro_data), table_ref, job_config=job_config)
+    load_job.result()
+    print(f"Loaded {load_job.output_rows} rows into {dataset_id}.{table_id}")
+
+def process_batch_and_upload_to_bigquery(batch, schema_file=schema_file_path, dataset_id=dataset_id, table_id=table_id):
+    """Process a batch of JSON records, convert to Avro, and upload to BigQuery."""
+    avro_schema = load_avro_schema(schema_file)
+
+    # Convert the entire batch of JSON records to Avro
+    avro_data = convert_batch_to_avro(batch, avro_schema)
+    if avro_data:
+        # Upload the Avro batch to BigQuery in one load job
+        send_to_bigquery_in_avro(avro_data, dataset_id, table_id)
+
+# Example usage
 if __name__ == "__main__":
-    kafka_topic = 'your_topic_name'
-    kafka_broker = 'localhost:9092'
-    schema_file_path = '/mnt/c/Users/Aryan/Projects/sem7/CS639/data-ingestion/weekly_data/weekly_data_schema.avsc'
-    dataset_id = 'uw-capstone.real_estate_data'
-    table_id = 'uw-capstone.real_estate_data.redfin_data'
-
-    # Use the consumer with the callback to send data to BigQuery
-    consume_avro_from_kafka(kafka_topic, kafka_broker, schema_file_path,
-        callback=lambda records: process_records_for_bigquery(records, schema_file_path, dataset_id, table_id))
+    start_kafka_consumer(
+        topic=topic_name,
+        process_callback=process_batch_and_upload_to_bigquery
+    )
