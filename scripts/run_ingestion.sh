@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_DIR="/opt/dataCEVA/data-ingestion/weekly_data"
+APP_DIR="/opt/dataCEVA/data-ingestion/"
 SCRIPTS_DIR="$APP_DIR/scripts"
 LOGS_DIR="$APP_DIR/logs"
 
@@ -18,7 +18,7 @@ exec > "$LOG_FILE" 2>&1
 
 echo "=== Data Ingestion Script Execution started at $(date) ==="
 
-source "$APP_DIR/venv/bin/activate"
+source "$APP_DIR/weekly_data/venv/bin/activate"
 if [ $? -ne 0]; then
     echo "Failed to activate venv"
     exit 1
@@ -26,7 +26,7 @@ fi
 
 echo "Virtual environment activated."
 
-cd "$APP_DIR" || { echo "Failed to navigate to app directory at $APP_DIR"; exit 1; }
+cd "$APP_DIR/weekly_data" || { echo "Failed to navigate to app directory at $APP_DIR/weekly_data"; exit 1; }
 echo "Navigated to application directory."
 
 echo "Running Python Ingestion Script..."
