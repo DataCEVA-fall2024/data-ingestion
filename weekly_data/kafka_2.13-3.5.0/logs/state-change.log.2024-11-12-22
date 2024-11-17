@@ -1,0 +1,3 @@
+[2024-11-12 22:50:26,706] INFO [Broker id=1] Transitioning 1 partition(s) to local leaders. (state.change.logger)
+[2024-11-12 22:50:26,717] INFO [Broker id=1] Creating new partition Aryan_dhanuka-0 with topic id gSfbaaLzRpW6S-z48o2WOg. (state.change.logger)
+[2024-11-12 22:50:26,749] INFO [Broker id=1] Leader Aryan_dhanuka-0 with topic id Some(gSfbaaLzRpW6S-z48o2WOg) starts at leader epoch 0 from offset 0 with partition epoch 0, high watermark 0, ISR [1], adding replicas [] and removing replicas [] . Previous leader epoch was -1. (state.change.logger)

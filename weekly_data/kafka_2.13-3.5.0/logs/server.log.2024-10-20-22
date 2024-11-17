@@ -1,0 +1,8 @@
+[2024-10-20 22:20:09,979] INFO [LocalLog partition=your_topic_name-0, dir=/tmp/kraft-combined-logs] Rolled new log segment at offset 1064515 in 24 ms. (kafka.log.LocalLog)
+[2024-10-20 22:20:10,008] INFO [ProducerStateManager partition=your_topic_name-0]Wrote producer snapshot at offset 1064515 with 0 producer ids in 7 ms. (org.apache.kafka.storage.internals.log.ProducerStateManager)
+[2024-10-20 22:25:39,628] INFO [LocalLog partition=your_topic_name-0, dir=/tmp/kraft-combined-logs] Rolled new log segment at offset 1419353 in 8 ms. (kafka.log.LocalLog)
+[2024-10-20 22:25:39,636] INFO [ProducerStateManager partition=your_topic_name-0]Wrote producer snapshot at offset 1419353 with 0 producer ids in 5 ms. (org.apache.kafka.storage.internals.log.ProducerStateManager)
+[2024-10-20 22:31:05,401] INFO [LocalLog partition=your_topic_name-0, dir=/tmp/kraft-combined-logs] Rolled new log segment at offset 1774191 in 4 ms. (kafka.log.LocalLog)
+[2024-10-20 22:31:05,407] INFO [ProducerStateManager partition=your_topic_name-0]Wrote producer snapshot at offset 1774191 with 0 producer ids in 5 ms. (org.apache.kafka.storage.internals.log.ProducerStateManager)
+[2024-10-20 22:50:55,551] INFO [SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000000033712-0000000002 because we have waited at least 60 minute(s). (org.apache.kafka.image.publisher.SnapshotGenerator)
+[2024-10-20 22:50:55,572] INFO [SnapshotEmitter id=1] Successfully wrote snapshot 00000000000000033712-0000000002 (org.apache.kafka.image.publisher.SnapshotEmitter)

@@ -1,0 +1,3 @@
+[2024-10-20 23:09:27,119] INFO [QuorumController id=1] CreateTopics result(s): CreatableTopic(name='your_topic_name1', numPartitions=1, replicationFactor=1, assignments=[], configs=[]): SUCCESS (org.apache.kafka.controller.ReplicationControlManager)
+[2024-10-20 23:09:27,139] INFO [QuorumController id=1] Created topic your_topic_name1 with topic ID ULXCzwrRSkeptqEVeUDrrA. (org.apache.kafka.controller.ReplicationControlManager)
+[2024-10-20 23:09:27,140] INFO [QuorumController id=1] Created partition your_topic_name1-0 with topic ID ULXCzwrRSkeptqEVeUDrrA and PartitionRegistration(replicas=[1], isr=[1], removingReplicas=[], addingReplicas=[], leader=1, leaderRecoveryState=RECOVERED, leaderEpoch=0, partitionEpoch=0). (org.apache.kafka.controller.ReplicationControlManager)

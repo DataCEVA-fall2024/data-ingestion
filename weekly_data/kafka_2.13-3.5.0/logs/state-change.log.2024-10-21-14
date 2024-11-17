@@ -1,0 +1,3 @@
+[2024-10-21 14:31:05,691] INFO [Broker id=1] Transitioning 1 partition(s) to local leaders. (state.change.logger)
+[2024-10-21 14:31:05,706] INFO [Broker id=1] Creating new partition your_topic_name6-0 with topic id 9Z3l3Z-vRkK3JzjIgObw7w. (state.change.logger)
+[2024-10-21 14:31:05,730] INFO [Broker id=1] Leader your_topic_name6-0 with topic id Some(9Z3l3Z-vRkK3JzjIgObw7w) starts at leader epoch 0 from offset 0 with partition epoch 0, high watermark 0, ISR [1], adding replicas [] and removing replicas [] . Previous leader epoch was -1. (state.change.logger)
