@@ -4,7 +4,7 @@ APP_DIR="/opt/dataCEVA/data-ingestion"
 SCRIPTS_DIR="$APP_DIR/scripts"
 LOGS_DIR="$APP_DIR/logs"
 
-TIMESTAMP=$(date + "%Y-%m-%d_%H-%M-%S")
+TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 
 LOG_FILE="$LOGS_DIR/run_${TIMESTAMP}.log"
 
