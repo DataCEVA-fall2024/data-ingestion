@@ -62,7 +62,7 @@ def process_large_csv(filename):
 
     print(f"Total rows processed: {total_rows_processed}")
 
-def convert_csv_to_avro(csv_filename, avro_filename, avro_schema):
+def convert_csv_to_avro(csv_filename, avro_filename, avro_schema, chunksize=10**6):
     """
     Convert CSV file to an Avro file
 
@@ -73,16 +73,26 @@ def convert_csv_to_avro(csv_filename, avro_filename, avro_schema):
     :param avro_schema: The Avro schema for the file.
     :type avro_schema: dict 
     """
+    def record_generator():
+        """
+        Generator that yields one record at a time from the CSV file.
+        """
+        try:
+            print("breaking csv into chunks")
+            for chunk in pd.read_csv(csv_filename, sep='\t', chunksize=chunksize, low_memory=False):
+                print("Breaking chunk into records")
+                for record in chunk.to_dict(orient='records'):
+                    yield record
+        except Exception as e:
+            print(f"Error reading CSV in chunks: {e}")
+            raise 
     try:
-        df = pd.read_csv(csv_filename, sep='\t', low_memory=False)
-
-        records = df.to_dict(orient='records')
-
-        with open(avro_filename, 'wb') as avro_file:
-            fastavro.writer(avro_file, avro_schema, records)
-
+        with open(avro_filename, 'wb') as out:
+            fastavro.writer(out, avro_schema, record_generator())
+        print(f"CSV succesfully converted to AVRO: {avro_filename}")
     except Exception as e:
         print(f"Error occured during CSV to Avro conversion: {e}")
+
 
 def read_first_n_records(avro_file, n):
     """
@@ -121,8 +131,10 @@ if __name__ == "__main__":
 
     avro_schema = load_schema_from_file(schema_filename)
 
-    download_large_file(csv_url, local_filename)
+    print("Starting download of the CSV file...")
+    #download_large_file(csv_url, local_filename)
     #process_large_csv(local_filename)
     #read_first_n_records(avro_filename, 50)
     if avro_schema:
+        print("Starting CSV to Avro conversion...")
         convert_csv_to_avro(local_filename, avro_filename, avro_schema)
