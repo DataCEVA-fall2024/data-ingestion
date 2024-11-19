@@ -13,9 +13,6 @@ The scripts directory holds helper scripts that are currently to be used during 
 
 
 
-
-
-
 ##### Other useful things
 
 ###### Log Rotate
@@ -37,6 +34,7 @@ sudo vim /etc/logrotate.d/dataCEVA_data
     create 0640 debiche debiche
 }
 ```
+> to test you can run `sudo logrotate -d /etc/logrotate.d/dataCEVA_data` (-d runs logrotate in debug mode without making changes)
 
 ###### Kafka systemd stuff
 (This lets us start up kafka services on system start up, so we can then startup consumer to run in background sending any new data it receives to bigquery)
@@ -79,8 +77,3 @@ Restart=on-abnormal
 WantedBy=multi-user.target
 
 ```
-
-
-
-> to test you can run `sudo logrotate -d /etc/logrotate.d/dataCEVA_data` (-d runs logrotate in debug mode without making changes)
-
