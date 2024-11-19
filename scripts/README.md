@@ -18,6 +18,8 @@ The scripts directory holds helper scripts that are currently to be used during 
 
 ##### Other useful things
 
+###### Log Rotate
+
 1. For the log directory it makes sense to implement log rotation to 
 manage log files effectively. Follow the steps below for setup
 
@@ -35,6 +37,50 @@ sudo vim /etc/logrotate.d/dataCEVA_data
     create 0640 debiche debiche
 }
 ```
+
+###### Kafka systemd stuff
+(This lets us start up kafka services on system start up, so we can then startup consumer to run in background sending any new data it receives to bigquery)
+
+1. kafka.service
+> located in /etc/systemd/system/kafka.service
+
+```
+[Unit]
+Requires=zookeeper.service
+After=zookeeper.service
+
+[Service]
+Type=simple
+User=debiche
+ExecStart=/bin/sh -c '/opt/dataCEVA/data-ingestion/kafka/bin/kafka-server-start.sh /opt/dataCEVA/data-ingestion/kafka/config/server.properties > /opt/dataCEVA/data-ingestion/kafka/kafka.log 2>&1'
+ExecStop=/opt/dataCEVA/data-ingestion/kafka/bin/kafka-server-stop.sh
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+2. zookeeper.service
+> located in /etc/systemd/system/zookeeper.service
+
+```
+[Unit]
+Requires=network.target remote-fs.target
+After=network.target remote-fs.target
+
+[Service]
+Type=simple
+User=debiche
+ExecStart=/opt/dataCEVA/data-ingestion/kafka/bin/zookeeper-server-start.sh /opt/dataCEVA/data-ingestion/kafka/config/zookeeper.properties
+ExecStop=/opt/dataCEVA/data-ingestion/kafka/bin/zookeeper-server-stop.sh
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+
 
 > to test you can run `sudo logrotate -d /etc/logrotate.d/dataCEVA_data` (-d runs logrotate in debug mode without making changes)
 
