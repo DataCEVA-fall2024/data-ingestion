@@ -31,7 +31,17 @@ echo "Navigated to application directory."
 
 echo "Running Python Ingestion Script..."
 
-python download_csv_convert_avro.py
+if [ "$1" == "weekly" ]; then
+    echo "Running Python Ingestion Script with -w flag..."
+    python download_csv_convert_avro.py -w
+elif [ "$1" == "neighborhood" ]; then
+    echo "Running Python Ingestion Script with -n flag..."
+    python download_csv_convert_avro.py -n
+else
+    echo "Invalid or no argument provided. Expected 'weekly' or 'neighborhood'."
+    exit 1
+fi
+
 PYTHON_EXIT_CODE=$?
 
 deactivate

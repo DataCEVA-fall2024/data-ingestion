@@ -201,6 +201,10 @@ def main():
         print("Completed process for getting weekly data")
     else:
         print("No option selected, exiting script as no selection made for what to ingest")
+        sys.exit(1)
+
+
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()
