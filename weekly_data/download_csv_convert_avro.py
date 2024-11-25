@@ -2,6 +2,41 @@ import requests
 import pandas as pd
 import fastavro
 import json
+import gzip
+import os
+import sys
+
+def unzip_large_file(input_file, output_file):
+    """
+    Unzips a large file in chunks to not overload memory usage
+
+    :param input_file: The name of file to unzip
+    :type input_file: str
+    :param output_file: The name of file to output unzip content to
+    :type output_file: str
+    """
+    buffer_size = 500 * 1024 * 1024
+
+    file_size = os.path.getsize(input_file)
+    processed_size = 0
+
+    try:
+        with gzip.open(input_file, 'rb') as f_in:
+            with open(output_file, 'wb') as f_out:
+                while True:
+                    chunk = f_in.read(buffer_size)
+                    if not chunk:
+                        break
+                    f_out.write(chunk)
+                    processed_size += len(chunk)
+                    progress = (processed_size / file_size) * 100
+                    sys.stdout.write(f'\rProgress: {progress:.2f}%')
+                    sys.stdout.flush()
+        print('\nUnzip succesfully completed')
+    except MemoryError:
+        print('MemoryError error, buffer size too large')
+    except Exception as e:
+        print(f'Exception occured: {e}')
 
 
 def download_large_file(url, filename):
@@ -123,18 +158,49 @@ def load_schema_from_file(schema_path):
         print(f"Error loading schema from file: {e}")
         return None
 
+def main():
+    parser = argparse.ArgumentParser(description="data ingestion script")
+    parser.add_argument('-n', '--neighborhood', action='store_true', dest='neighborhood', help='If set run script to ingest neighborhood data')
+    parser.add_argument('-w', '--weekly', action='store_true', dest='weekly', help='If set run script to ingest weekly data')
+
+    args = parser.parse_args()
+
+    if args.neighborhood:
+        print("Getting neighborhood data")
+        neighbor_zip_url = 'https://redfin-public-data.s3.us-west-2.amazonaws.com/redfin_market_tracker/neighborhood_market_tracker.tsv000.gz'
+        neighborhood_zip_filename = 'redfin_neighborhood_zip.gz'
+        neighborhood_csv_filename = 'redfin_neighborhood_csv.csv'
+        avro_neighbor_schema_filename = 'redfin_neighborhood_schema.avsc'
+        avro_neighbor_data_filename = 'redfin_neighborhood_data.avro'
+
+        avro_neighbor_schema = load_schema_from_file(avro_neighbor_schema_filename)
+
+        print("Starting download of the CSV file...")
+        download_large_file(neighbor_zip_url, neighborhood_zip_filename)
+        unzip_large_file(neighborhood_zip_filename, neighborhood_csv_filename)
+        if avro_neighbor_schema:
+            print("Starting CSV to Avro conversion...")
+            convert_csv_to_avro(neighborhood_csv_filename, avro_neighbor_data_filename, avro_neighbor_schema)
+
+        print("Completed process for getting weekly data")
+
+    if args.weekly: 
+        weekly_csv_url = 'https://redfin-public-data.s3.us-west-2.amazonaws.com/redfin_covid19/weekly_housing_market_data_most_recent.tsv000'
+        weekly_data_filename = 'redfin_weekly_data.csv'
+        weekly_avro_filename = 'redfin_weekly_data.avro'
+        weekly_schema_filename = 'weekly_data_schema.avsc'
+
+        avro_schema = load_schema_from_file(weekly_schema_filename)
+
+        print("Starting download of the CSV file...")
+        download_large_file(weekly_csv_url, weekly_data_filename)
+
+        if avro_schema:
+            print("Starting CSV to Avro conversion...")
+            convert_csv_to_avro(local_filename, avro_filename, avro_schema)
+        print("Completed process for getting weekly data")
+    else:
+        print("No option selected, exiting script as no selection made for what to ingest")
+
 if __name__ == "__main__":
-    csv_url = 'https://redfin-public-data.s3.us-west-2.amazonaws.com/redfin_covid19/weekly_housing_market_data_most_recent.tsv000'
-    local_filename = 'redfin_weekly_data.csv'
-    avro_filename = 'redfin_weekly_data.avro'
-    schema_filename = 'weekly_data_schema.avsc'
-
-    avro_schema = load_schema_from_file(schema_filename)
-
-    print("Starting download of the CSV file...")
-    #download_large_file(csv_url, local_filename)
-    #process_large_csv(local_filename)
-    #read_first_n_records(avro_filename, 50)
-    if avro_schema:
-        print("Starting CSV to Avro conversion...")
-        convert_csv_to_avro(local_filename, avro_filename, avro_schema)
+    main()
