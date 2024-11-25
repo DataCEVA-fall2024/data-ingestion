@@ -170,7 +170,7 @@ def main():
         neighbor_zip_url = 'https://redfin-public-data.s3.us-west-2.amazonaws.com/redfin_market_tracker/neighborhood_market_tracker.tsv000.gz'
         neighborhood_zip_filename = 'redfin_neighborhood_zip.gz'
         neighborhood_csv_filename = 'redfin_neighborhood_csv.csv'
-        avro_neighbor_schema_filename = 'redfin_neighborhood_schema.avsc'
+        avro_neighbor_schema_filename = 'neighborhood_data_schema.avsc'
         avro_neighbor_data_filename = 'redfin_neighborhood_data.avro'
 
         avro_neighbor_schema = load_schema_from_file(avro_neighbor_schema_filename)
