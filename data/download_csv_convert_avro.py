@@ -1,10 +1,13 @@
 import requests
 import pandas as pd
 import fastavro
+from fastavro import writer, parse_schema
 import json
 import gzip
 import os
 import sys
+import argparse
+import csv
 
 def unzip_large_file(input_file, output_file):
     """
@@ -108,26 +111,19 @@ def convert_csv_to_avro(csv_filename, avro_filename, avro_schema, chunksize=10**
     :param avro_schema: The Avro schema for the file.
     :type avro_schema: dict 
     """
-    def record_generator():
-        """
-        Generator that yields one record at a time from the CSV file.
-        """
-        try:
-            print("breaking csv into chunks")
-            for chunk in pd.read_csv(csv_filename, sep='\t', chunksize=chunksize, low_memory=False):
-                print("Breaking chunk into records")
-                for record in chunk.to_dict(orient='records'):
-                    yield record
-        except Exception as e:
-            print(f"Error reading CSV in chunks: {e}")
-            raise 
-    try:
-        with open(avro_filename, 'wb') as out:
-            fastavro.writer(out, avro_schema, record_generator())
-        print(f"CSV succesfully converted to AVRO: {avro_filename}")
-    except Exception as e:
-        print(f"Error occured during CSV to Avro conversion: {e}")
+    parsed_schema = parse_schema(avro_schema)
 
+    try:
+        with open(csv_filename, 'r', newline='') as csv_file, open(avro_filename, 'wb') as avro_file:
+            # Use csv.DictReader to read the CSV file line by line
+            csv_reader = csv.DictReader(csv_file, delimiter='\t')  # Adjust delimiter if needed
+
+            # Write records to the Avro file using fastavro.writer
+            writer(avro_file, parsed_schema, csv_reader)
+        print(f"CSV successfully converted to AVRO: {avro_filename}")
+    except Exception as e:
+        print(f"Error occurred during CSV to Avro conversion: {e}")
+    
 
 def read_first_n_records(avro_file, n):
     """
