@@ -111,19 +111,25 @@ def convert_csv_to_avro(csv_filename, avro_filename, avro_schema, chunksize=10**
     :param avro_schema: The Avro schema for the file.
     :type avro_schema: dict 
     """
+    def record_generator():
+        try:
+            print("Reading CSV in chunks")
+            for chunk in pd.read_csv(csv_filename, sep='\t', chunksize=chunksize, low_memory=True):
+                print("Processing chunk")
+                for record in chunk.itertuples(index=False, name=None):
+                    yield dict(zip(chunk.columns, record))
+        except Exception as e:
+            print(f"Error reading CSV in chunks: {e}")
+            raise
+
     parsed_schema = parse_schema(avro_schema)
 
     try:
-        with open(csv_filename, 'r', newline='') as csv_file, open(avro_filename, 'wb') as avro_file:
-            # Use csv.DictReader to read the CSV file line by line
-            csv_reader = csv.DictReader(csv_file, delimiter='\t')  # Adjust delimiter if needed
-
-            # Write records to the Avro file using fastavro.writer
-            writer(avro_file, parsed_schema, csv_reader)
+        with open(avro_filename, 'wb') as out:
+            writer(out, parsed_schema, record_generator())
         print(f"CSV successfully converted to AVRO: {avro_filename}")
     except Exception as e:
-        print(f"Error occurred during CSV to Avro conversion: {e}")
-    
+        print(f"Error occurred during CSV to Avro conversion: {e}")   
 
 def read_first_n_records(avro_file, n):
     """
