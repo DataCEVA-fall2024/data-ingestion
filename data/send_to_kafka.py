@@ -27,11 +27,27 @@ def process_csv_row_by_row(csv_file, kafka_topic):
                 print(f"Error sending record to Kafka: {e}")
                 # Optionally log or handle errors for individual rows
 
-if __name__ == "__main__":
-    # Define the CSV file path and Kafka topic
-    csv_file_path = './redfin_weekly_data.csv'  # Replace with the path to your CSV file
-    kafka_topic = 'Aryan_dhanuka123'  # Replace with your Kafka topic name
+def main():
+    parser = argparse.ArgumentParser(description="Kafka producer Script")
+    parser.add_argument('-n', '--neighborhood', action='store_true', dest='neighborhood', help='If set run script to ingest neighborhood data')
+    parser.add_argument('-w', '--weekly', action='store_true', dest='weekly', help='If set run script to ingest weekly data')
 
-    # Process the CSV file row by row and send each record to Kafka
-    process_csv_row_by_row(csv_file_path, kafka_topic)
+    args = parser.parse_args()
+    if args.neighborhood:
+        csv_file_path = './redfin_neighborhood_csv.csv'
+        kafka_topic = 'neighborhood_data'
+        process_csv_row_by_row(csv_file_path, kafka_topic)
+    if args.weekly: 
+        csv_file_path = './redfin_weekly_data.csv'  # Replace with the path to your CSV file
+        kafka_topic = 'Aryan_dhanuka123'  # Replace with your Kafka topic name
+        # Process the CSV file row by row and send each record to Kafka
+        process_csv_row_by_row(csv_file_path, kafka_topic)
+    else:
+        print("No option selected, exiting script as no selection made for what to send to Kafka")
+        sys.exit(1)
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
 

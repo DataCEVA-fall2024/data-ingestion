@@ -10,10 +10,21 @@ import threading
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] ='/mnt/c/Users/Aryan/Downloads/uw-capstone-b295368271ff.JSON'
 # Initialize BigQuery client
 client = bigquery.Client()
-topic_name = 'Aryan_dhanuka123'
-schema_file_path = './weekly_data_schema.avsc' 
+
+
+CONFIG = {
+        'Aryan_dhanuka123': {
+            'schema_file_path': './weekly_data_schema.avsc' 
+            'table_id': 'redfin_raw_data'
+        },
+        'neighborhood_data': {
+            'schema_file_path': './neighborhood_data_schema.avsc'
+            'table_id': 'redfin_neighborhood_data'
+        },
+}
 dataset_id = 'raw_zone'
-table_id = 'redfin_raw_data'
+
+topic_names = list(CONFIG.keys())
 
 def load_avro_schema(schema_file):
     """Load Avro schema from a file."""
@@ -85,19 +96,21 @@ def send_to_bigquery_in_avro(avro_data, dataset_id, table_id):
     load_job.result()
     print(f"Loaded {load_job.output_rows} rows into {dataset_id}.{table_id}")
 
-def process_batch_and_upload_to_bigquery(batch, schema_file=schema_file_path, dataset_id=dataset_id, table_id=table_id):
+def process_batch_and_upload_to_bigquery(batch, topic, **kwargs):
     """Process a batch of JSON records, convert to Avro, and upload to BigQuery."""
-    avro_schema = load_avro_schema(schema_file)
-
-    # Convert the entire batch of JSON records to Avro
+    config = CONFIG.get(topic)
+    if not config:
+        print(f"No configuration found for topic: {topic}")
+        return 
+    
+    avro_schema = load_avro_schema(config['schema_file'])
     avro_data = convert_batch_to_avro(batch, avro_schema)
     if avro_data:
-        # Upload the Avro batch to BigQuery in one load job
-        send_to_bigquery_in_avro(avro_data, dataset_id, table_id)
+        send_to_bigquery_in_avro(avro_data, dataset_id, config['table_id'])
 
-# Example usage
+
 if __name__ == "__main__":
     start_kafka_consumer(
-        topic=topic_name,
+        topic=topic_names,
         process_callback=process_batch_and_upload_to_bigquery
     )
