@@ -9,6 +9,62 @@ import sys
 import argparse
 import csv
 
+
+def avro_to_pd_dtypes(avro_schema):
+    """ 
+    Converts an Avro schema to a pandas dtype mapping.
+
+    :param avro_schema: The Avro schema as a dictionary
+    :type avro_schema: dict
+    :return: Dictionary mapping field names to pd tyes
+    :rtype: dict
+    """
+
+    avro_type_to_pd = {
+        'string': 'str',
+        'int': 'Int32',  # Use pandas nullable integer type
+        'long': 'Int64',  # Use pandas nullable integer type
+        'float': 'float32',
+        'double': 'float64',
+        'boolean': 'bool',
+        'bytes': 'bytes',
+        'date': 'str',  # Dates can be parsed later
+        'timestamp-micros': 'str',  # Timestamps can be parsed later
+    }
+
+    dtype_map = {}
+
+    for field in avro_schema.get('fields', []):
+        field_name = field['name']
+        field_type = field['type']
+
+        if isinstance(field_type, list):
+            types = [t for t in field_type if t != 'null']
+            if len(types) = 1:
+                field_type = types[0]
+            else:
+                field_type = 'string'
+        if isinstance(field_type, dict):
+            logical_type = field_type.get('logicalType')
+            if logical_type:
+                if logical_type == 'date':
+                    dtype = 'str'  # Or 'object' if you plan to parse dates later
+                elif logical_type == 'timestamp-micros':
+                    dtype = 'str'  # Or 'object' for parsing
+                else:
+                    dtype = 'str'
+            else:
+                # Handle other complex types if necessary
+                dtype = 'str'
+        else:
+            dtype = avro_type_to_pd.get(field_type, 'str')
+
+        dtype_map[field_name] = dtype
+
+    return dtype_map
+
+
+
 def unzip_large_file(input_file, output_file):
     """
     Unzips a large file in chunks to not overload memory usage
@@ -111,11 +167,22 @@ def convert_csv_to_avro(csv_filename, avro_filename, avro_schema, chunksize=10**
     :param avro_schema: The Avro schema for the file.
     :type avro_schema: dict 
     """
+
+    dtype = avro_to_pd_dtypes(avro_schema)
+    na_val = ['', ' ', 'NA', 'NaN', None]
     def record_generator():
         try:
             print("Reading CSV in chunks")
-            for chunk in pd.read_csv(csv_filename, sep='\t', chunksize=chunksize, low_memory=True):
+            for chunk in pd.read_csv(
+                    csv_filename, 
+                    sep='\t', 
+                    chunksize=chunksize, 
+                    dtype=dtype,
+                    na_values=na_val,
+                    keep_deafult_na=True,
+                    low_memory=True):
                 print("Processing chunk")
+                chunk = chunk.where(pd.notnull(chunk), None)
                 for record in chunk.itertuples(index=False, name=None):
                     yield dict(zip(chunk.columns, record))
         except Exception as e:
