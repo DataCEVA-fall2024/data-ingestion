@@ -15,11 +15,11 @@ client = bigquery.Client()
 CONFIG = {
     'Aryan_dhanuka123': {
         'schema_file_path': './weekly_data_schema.avsc',
-        'table_id': 'redfin_raw_data'
+        'table_id': 'raw_county_data'
     },
     'neighborhood_data': {
         'schema_file_path': './neighborhood_data_schema.avsc',
-        'table_id': 'redfin_neighborhood_data'
+        'table_id': 'raw_neighborhood_data'
     },
 }
 dataset_id = 'raw_zone'
