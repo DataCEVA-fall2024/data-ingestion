@@ -29,7 +29,7 @@ def start_kafka_consumer(topics, process_callback, bootstrap_servers='localhost:
 
     for topic in topics:
         batches[topic] = []
-        batch_lock[topic] = threading.RLock()
+        batch_locks[topic] = threading.RLock()
         batch_timers[topic] = None
 
     def flush_batch(topic):
