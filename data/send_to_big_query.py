@@ -13,14 +13,14 @@ client = bigquery.Client()
 
 
 CONFIG = {
-        'Aryan_dhanuka123': {
-            'schema_file_path': './weekly_data_schema.avsc' 
-            'table_id': 'redfin_raw_data'
-        },
-        'neighborhood_data': {
-            'schema_file_path': './neighborhood_data_schema.avsc'
-            'table_id': 'redfin_neighborhood_data'
-        },
+    'Aryan_dhanuka123': {
+        'schema_file_path': './weekly_data_schema.avsc',
+        'table_id': 'redfin_raw_data'
+    },
+    'neighborhood_data': {
+        'schema_file_path': './neighborhood_data_schema.avsc',
+        'table_id': 'redfin_neighborhood_data'
+    },
 }
 dataset_id = 'raw_zone'
 
@@ -103,7 +103,7 @@ def process_batch_and_upload_to_bigquery(batch, topic, **kwargs):
         print(f"No configuration found for topic: {topic}")
         return 
     
-    avro_schema = load_avro_schema(config['schema_file'])
+    avro_schema = load_avro_schema(config['schema_file_path'])
     avro_data = convert_batch_to_avro(batch, avro_schema)
     if avro_data:
         send_to_bigquery_in_avro(avro_data, dataset_id, config['table_id'])
