@@ -26,7 +26,7 @@ def avro_to_pd_dtypes(avro_schema):
         'long': 'Int64',  # Use pandas nullable integer type
         'float': 'float32',
         'double': 'float64',
-        'boolean': 'bool',
+        'boolean': 'str',
         'bytes': 'bytes',
         'date': 'str',  # Dates can be parsed later
         'timestamp-micros': 'str',  # Timestamps can be parsed later
@@ -40,7 +40,7 @@ def avro_to_pd_dtypes(avro_schema):
 
         if isinstance(field_type, list):
             types = [t for t in field_type if t != 'null']
-            if len(types) = 1:
+            if len(types) == 1:
                 field_type = types[0]
             else:
                 field_type = 'string'
@@ -156,6 +156,29 @@ def process_large_csv(filename):
 
     print(f"Total rows processed: {total_rows_processed}")
 
+def get_boolean_fields(avro_schema):
+    boolean_fields = []
+    for field in avro_schema.get('fields', []):
+        field_name = field['name']
+        field_type = field['type']
+        if isinstance(field_type, list):
+            if 'boolean' in field_type:
+                boolean_fields.append(field_name)
+        elif field_type == 'boolean':
+            boolean_fields.append(field_name)
+    return boolean_fields
+
+def str_to_bool(s):
+    if pd.isnull(s):
+        return None
+    s_lower = str(s).strip().lower()
+    if s_lower in ['true', '1', 't', 'yes', 'y']:
+        return True
+    elif s_lower in ['false', '0', 'f', 'no', 'n']:
+        return False
+    else:
+        return None  # or raise ValueError(f"Cannot convert {s} to boolean")
+
 def convert_csv_to_avro(csv_filename, avro_filename, avro_schema, chunksize=10**6):
     """
     Convert CSV file to an Avro file
@@ -170,6 +193,12 @@ def convert_csv_to_avro(csv_filename, avro_filename, avro_schema, chunksize=10**
 
     dtype = avro_to_pd_dtypes(avro_schema)
     na_val = ['', ' ', 'NA', 'NaN', None]
+
+
+    boolean_fields = get_boolean_fields(avro_schema)
+
+    # Create converters dictionary for boolean fields
+    converters = {field: str_to_bool for field in boolean_fields}
     def record_generator():
         try:
             print("Reading CSV in chunks")
@@ -179,7 +208,7 @@ def convert_csv_to_avro(csv_filename, avro_filename, avro_schema, chunksize=10**
                     chunksize=chunksize, 
                     dtype=dtype,
                     na_values=na_val,
-                    keep_deafult_na=True,
+                    keep_default_na=True,
                     low_memory=True):
                 print("Processing chunk")
                 chunk = chunk.where(pd.notnull(chunk), None)
@@ -245,8 +274,8 @@ def main():
         avro_neighbor_schema = load_schema_from_file(avro_neighbor_schema_filename)
 
         print("Starting download of the CSV file...")
-        download_large_file(neighbor_zip_url, neighborhood_zip_filename)
-        unzip_large_file(neighborhood_zip_filename, neighborhood_csv_filename)
+    #    download_large_file(neighbor_zip_url, neighborhood_zip_filename)
+    #    unzip_large_file(neighborhood_zip_filename, neighborhood_csv_filename)
         if avro_neighbor_schema:
             print("Starting CSV to Avro conversion...")
             convert_csv_to_avro(neighborhood_csv_filename, avro_neighbor_data_filename, avro_neighbor_schema)
