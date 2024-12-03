@@ -38,44 +38,62 @@ def validate_and_convert_types(json_record, avro_schema):
         field_name = field['name']
         field_type = field['type']
 
-        if field_name in json_record:
-            value = json_record[field_name]
-            if value in [None, '', 'null']:  # Adjust based on your input format
-                converted_record[field_name] = field.get('default', None)
-            else:
+        if isinstance(field_type, list):
+            field_type = [t for t in field_type if t != 'null'][0]
+
+        value = json_record.get(field_name)
+        if value in [None, '', 'null']:
+            converted_record[field_name] = None
+        else:
+            try:
                 if isinstance(field_type, dict) and 'logicalType' in field_type:
-                    if field_type['logicalType'] == 'date':
-                        try:
-                            converted_record[field_name] = datetime.strptime(value, '%Y-%m-%d').date()
-                        except ValueError:
-                            converted_record[field_name] = None
+                    logical_type = field_type['logicalType']
+                    if logical_type == 'date':
+                        converted_record[field_name] = datetime.strptime(value, '%Y-%m-%d').date()
+                    elif logical_type == 'timestamp-micros':
+                        converted_record[field_name] = datetime.strptime(value, '%Y-%m-%d %H:%M:%S.%f')
+                    else:
+                        converted_record[field_name] = value
                 elif field_type == 'int':
-                    try:
-                        converted_record[field_name] = int(value)
-                    except ValueError:
-                        converted_record[field_name] = None
+                    converted_record[field_name] = int(float(value))
+                elif field_type == 'long':
+                    converted_record[field_name] = int(float(value))
                 elif field_type == 'float':
-                    try:
-                        converted_record[field_name] = float(value)
-                    except ValueError:
-                        converted_record[field_name] = None
+                    converted_record[field_name] = float(value)
+                elif field_type == 'double':
+                    converted_record[field_name] = float(value)
+                elif field_type == 'boolean':
+                    converted_record[field_name] = value.lower() == 'true' if isinstance(value, str) else bool(value)
                 elif field_type == 'string':
                     converted_record[field_name] = str(value)
                 else:
                     converted_record[field_name] = value
-        else:
-            converted_record[field_name] = field.get('default', None)
-
+            except (ValueError, TypeError) as e:
+                print(f"Type conversion error for field '{field_name}' with value '{value}': {e}")
+                converted_record[field_name] = None
     return converted_record
 
 def convert_batch_to_avro(batch, avro_schema):
     """Convert a batch of JSON records to Avro format with data type validation and conversion."""
+
     avro_bytes_io = BytesIO()
+    validated_records = []
+    invalid_records = []
 
-    # Validate and convert each record in the batch
-    validated_records = [validate_and_convert_types(record, avro_schema) for record in batch]
+    for record in batch:
+        validated_record = validate_and_convert_types(record, avro_schema)
+        if fastavro.validation.validate(validated_record, avro_schema):
+            validated_records.append(validated_record)
+        else:
+            invalid_records.append(record)
 
-    # Write all validated records to Avro in one operation
+    if invalid_records:
+        print(f"Found {len(invalid_records)} invalid records.")
+
+    if not validated_records:
+        print("No valid records to write.")
+        return None
+
     try:
         fastavro.writer(avro_bytes_io, avro_schema, validated_records)
     except Exception as e:
@@ -84,7 +102,6 @@ def convert_batch_to_avro(batch, avro_schema):
 
     avro_bytes_io.seek(0)
     return avro_bytes_io.getvalue()
-
 def send_to_bigquery_in_avro(avro_data, dataset_id, table_id):
     """Send Avro data to BigQuery."""
     table_ref = client.dataset(dataset_id).table(table_id)
