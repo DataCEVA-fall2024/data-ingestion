@@ -18,7 +18,7 @@ exec > "$LOG_FILE" 2>&1
 
 echo "=== Data Ingestion Script Execution started at $(date) ==="
 
-source "$APP_DIR/weekly_data/venv/bin/activate"
+source "$APP_DIR/data/venv/bin/activate"
 if [ $? -ne 0 ]; then
     echo "Failed to activate venv"
     exit 1
@@ -26,7 +26,7 @@ fi
 
 echo "Virtual environment activated."
 
-cd "$APP_DIR/weekly_data" || { echo "Failed to navigate to app directory at $APP_DIR/weekly_data"; exit 1; }
+cd "$APP_DIR/data" || { echo "Failed to navigate to app directory at $APP_DIR/data"; exit 1; }
 echo "Navigated to application directory."
 
 echo "Running Python Ingestion Script..."
@@ -43,6 +43,17 @@ else
 fi
 
 PYTHON_EXIT_CODE=$?
+
+if [ "$1" == "weekly" ]; then
+    echo "Starting kafka producer Script with -w flag..."
+    python send_to_kafka.py -w
+elif [ "$1" == "neighborhood" ]; then
+    echo "Starting kafka producer Script with -n flag..."
+    python send_to_kafka.py -n
+else
+    echo "Invalid or no argument provided. Expected 'weekly' or 'neighborhood'."
+    exit 1
+fi
 
 deactivate
 
