@@ -1,0 +1,321 @@
+{
+  "type": "record",
+  "name": "PropertyData",
+  "fields": [
+    {
+      "name": "period_begin",
+      "type": {
+        "type": "int",
+        "logicalType": "date"
+      },
+      "default": 0
+    },
+    {
+      "name": "period_end",
+      "type": {
+        "type": "int",
+        "logicalType": "date"
+      },
+      "default": 0
+    },
+    {
+      "name": "period_duration",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "region_type",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "region_type_id",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "table_id",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "is_seasonally_adjusted",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "region",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "city",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "state_code",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "property_type",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "property_type_id",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "median_sale_price",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_sale_price_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_sale_price_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_list_price",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_list_price_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_list_price_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_ppsf",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_ppsf_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_ppsf_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_list_ppsf",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_list_ppsf_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_list_ppsf_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "homes_sold",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "homes_sold_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "homes_sold_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "pending_sales",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "pending_sales_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "pending_sales_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "new_listings",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "new_listings_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "new_listings_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "inventory",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "inventory_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "inventory_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "months_of_supply",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "months_of_supply_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "months_of_supply_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_days_to_close",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_days_to_close_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_days_to_close_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_dom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_dom_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "median_dom_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "avg_sale_to_list",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "avg_sale_to_list_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "avg_sale_to_list_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "sold_above_list",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "sold_above_list_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "sold_above_list_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "price_drops",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "price_drops_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "price_drops_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "off_market_in_two_weeks",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "off_market_in_two_weeks_mom",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "off_market_in_two_weeks_yoy",
+      "type": ["null", "float"],
+      "default": null
+    },
+    {
+      "name": "parent_metro_region",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "parent_metro_region_metro_code",
+      "type": ["null", "int"],
+      "default": null
+    },
+    {
+      "name": "last_updated",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "default": 0
+    }
+  ]
+}
+
