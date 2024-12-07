@@ -14,6 +14,8 @@ The scripts directory holds helper scripts that are currently to be used during 
 
 
 ##### Other useful things
+- If data is failing to be injested you may need to reauth with google which can be done with the following command:
+  - gcloud auth application-default login --no-launch-browser
 
 ###### Log Rotate
 
@@ -76,4 +78,26 @@ Restart=on-abnormal
 [Install]
 WantedBy=multi-user.target
 
+```
+
+3. Our customer Consumer to run on startup as well
+> located in /etc/systemd/system/my-kafka-consumer.service
+
+```
+[Unit]
+Description=Big Query Consumer
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=debiche
+Group=debiche
+WorkingDirectory=/opt/dataCEVA/data-ingestion/data
+Environment="PATH=/opt/dataCEVA/data-ingestion/data/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/opt/dataCEVA/data-ingestion/data/venv/bin/python /opt/dataCEVA/data-ingestion/data/send_to_big_query.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
 ```
