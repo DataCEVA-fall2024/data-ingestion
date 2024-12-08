@@ -33,6 +33,10 @@ See Scripts README as mentioned above to setup infrastructure automation but oth
 
 ## Misc.
 
+### What's next
+- Additonal data sources
+- API to access data
+- Adjust to client needs
 ### For instructors & dataCEVA
 Should be able to find data and sql queries for data processing between zones inside the big query instance, additionally for VM automation the app lives in /opt/dataCEVA/...
 Cronjobs are on the debiche user which isn't best practice but was easiest in to get setup in this case.
