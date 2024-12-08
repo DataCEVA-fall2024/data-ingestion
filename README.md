@@ -39,6 +39,4 @@ Cronjobs are on the debiche user which isn't best practice but was easiest in to
 
 Can find systemd in /etc/systemd/system/... as showed in scripts directory README.
 
-THANK YOU :) 
-
 ![Bufo Hearts](https://github.com/DataCEVA-fall2024/data-ingestion/blob/add_neighborhood_data/bufo-hearts.png)
