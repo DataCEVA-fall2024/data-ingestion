@@ -6,6 +6,8 @@ For our DataCEVA 620 Capstone project we ingest real estate data that regularly 
 
 ![Data Diagram](https://github.com/DataCEVA-fall2024/data-ingestion/blob/add_neighborhood_data/Data%20Diagram.png?raw=true)
 
+##### TO USE/SEE VISUALIZATIONS ON TABLEAU FILE PRESENT IN GIT REPOSITORY YOU MUST GET JSON FILE FOR BIG QUERY AUTHENTICATION AND CONNECT IT AS A DATA SOURCE TO YOUR TABLEAU FILE
+
 ## Github stuff
 
 ### Data Directory
@@ -30,6 +32,10 @@ Create Database inside of bigquery according to the data diagram/schema and may 
 Setup google credentials on your machine and modify the credentials path (ideally stored in ENV but didn't get to that)
 
 See Scripts README as mentioned above to setup infrastructure automation but otherwise setup venv, use requirements.txt to install requirements, then run your injestion scripts: Warning this may take a while...
+
+#### AGAIN TO USE/SEE VISUALIZATIONS ON TABLEAU FILE PRESENT IN GIT REPOSITORY YOU MUST GET JSON FILE FOR BIG QUERY AUTHENTICATION AND CONNECT IT AS A DATA SOURCE TO YOUR TABLEAU FILE
+
+
 
 ## Misc.
 
