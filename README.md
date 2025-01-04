@@ -2,7 +2,7 @@
 
 
 ## Overview
-For our DataCEVA 620 Capstone project we ingest real estate data that regularly updates from redfin. This ingested data is then pushed through a Kafka pipeline to BigQuery which then moves through multiple processing stages(see image below) before finally being used in Tableau for dashboard visualizations
+For our DataCEVA 620 Capstone project we ingest real estate data that regularly updates from redfin. This ingested data is then pushed through a Kafka pipeline to BigQuery where it moves through multiple processing stages(see image below) before finally being used in Tableau for dashboard visualizations
 
 ![Data Diagram](https://github.com/DataCEVA-fall2024/data-ingestion/blob/add_neighborhood_data/Data%20Diagram.png?raw=true)
 
